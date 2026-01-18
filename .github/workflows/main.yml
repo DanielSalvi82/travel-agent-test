@@ -9,23 +9,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Test Full Itinerary
+      - name: Create request.json
+        run: |
+          cat > request.json << 'EOF'
+          {
+            "model": "kimi-k2-thinking",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Planeje 15 dias na Califórnia com RV Winnebago Vista 29V, budget R$400/dia, paradas: Paso Robles (2n), Big Sur (1n), Yosemite (4n), Lake Tahoe (3n), San Francisco (2n). Max 5h direção/dia. Gere 3 opções (A/B/C)."
+              }
+            ],
+            "max_tokens": 8000
+          }
+          EOF
+        
+      - name: Call Moonshot API
         env:
           MOONSHOT_KEY: ${{ secrets.MOONSHOT_API_KEY }}
         run: |
           curl -X POST https://api.moonshot.ai/v1/chat/completions \
             -H "Authorization: Bearer $MOONSHOT_KEY" \
             -H "Content-Type: application/json" \
-            -d '{
-              "model": "kimi-k2-thinking",
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Planeje 15 dias na Califórnia com RV Winnebago Vista 29V, budget R$400/dia, paradas: Paso Robles (2n), Big Sur (1n), Yosemite (4n), Lake Tahoe (3n), San Francisco (2n). Max 5h direção/dia. Gere 3 opções (A/B/C)."
-                }
-              ],
-              "max_tokens": 8000
-            } | jq '.choices[0].message.content' > itinerary.json
+            -d @request.json | jq '.choices[0].message.content' > itinerary.json
           
-          echo "✅ Itinerário gerado:"
-          cat itinerary.json | head -c 500
+          echo "✅ Itinerário gerado (primeiros 500 chars):"
+          cat itinerary.json | sed 's/^"//' | sed 's/"$//' | head -c 500
