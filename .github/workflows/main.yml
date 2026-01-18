@@ -16,4 +16,4 @@ jobs:
           curl -X POST https://api.moonshot.ai/v1/chat/completions \
             -H "Authorization: Bearer $MOONSHOT_KEY" \
             -H "Content-Type: application/json" \
-            -d '{"model":"kimi-k2-thinking","messages":[{"role":"user","content":"Hello"}],"max_tokens":50}'
+            -d '{"model":"kimi-k2-thinking","messages":[{"role":"user","content":"Hello"}],"max_tokens":8000}'
